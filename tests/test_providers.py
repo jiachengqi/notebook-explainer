@@ -137,6 +137,23 @@ class OpenAICompatTests(unittest.TestCase):
         self.assertEqual(len(self.api.requests), 1)
         self.assertIn("7h 12m", str(ctx.exception))
 
+    def test_per_minute_limit_waits_as_long_as_the_provider_asks(self):
+        import harness.providers as prov
+        waits = []
+        original = prov.time.sleep
+        prov.time.sleep = waits.append
+        try:
+            self.api.responses += [(429, {"error": {"message": "Quota exceeded for metric: generate_content_free_tier"
+                                                               "_requests, limit: 5, description: Generate content "
+                                                               "requests per minute limit exceeded on Free Tier. "
+                                                               "Please retry in 8.75064651s."}}), chat_ok("{}")]
+            self.p.complete("s", "u", None)
+        finally:
+            prov.time.sleep = original
+        self.assertEqual(len(self.api.requests), 2)
+        self.assertEqual(len(waits), 1)
+        self.assertTrue(9 <= waits[0] <= 11, waits)
+
     def test_overloaded_provider_gets_longer_waits(self):
         import harness.providers as prov
         waits = []

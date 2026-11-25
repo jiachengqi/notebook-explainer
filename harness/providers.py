@@ -24,7 +24,9 @@ A ``harness.toml`` in a cloned repository therefore cannot redirect your key.
 from __future__ import annotations
 
 import json
+import math
 import os
+import random
 import re
 import time
 import urllib.error
@@ -170,6 +172,8 @@ def _quota_error(url: str, message: str, raw: str, retry_after: str | None) -> Q
                          "Switch provider, enable billing, or try again later.")
     else:
         err = QuotaError(f"HTTP 429 from {url}: {message}")
+    if retry_after is None and wait and not daily:
+        retry_after = str(math.ceil(wait))   # "Please retry in 8.75s" in the body: wait that long, not 2 s
     err.status = 429  # type: ignore[attr-defined]
     err.retry_after = retry_after  # type: ignore[attr-defined]
     err.daily = daily
@@ -213,6 +217,8 @@ def _with_retries(call, retries: int = 2):
             ra = getattr(exc, "retry_after", None)
             if ra and str(ra).isdigit():
                 wait = min(int(ra), 30)
+            if status == 429:
+                wait += random.uniform(0, 2)   # parallel documents must not all retry in the same second
             time.sleep(wait)
     raise AssertionError("unreachable")
 

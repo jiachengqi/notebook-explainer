@@ -76,7 +76,7 @@ The tool reads proprietary code and holds API keys, and its input is written by 
 | LLM02 Sensitive information disclosure | secrets in code, the code itself, API keys | secrets redacted at load, so they reach no prompt, document, report or screen, and scrubbed from model output; `.ipynb` outputs never read; reports keep relative paths; known keys only go to their own provider's host, never over plain HTTP; `local_only` policy | `tests/test_security.py`, `tests/test_providers.py` | secrets that match no pattern; the code itself goes to the provider unless `local_only` is on |
 | LLM03 Excessive agency | | the model has no tools: it returns JSON, and code decides what is shown; the MCP server is read-only and confined to one folder | `tests/test_tools.py` | |
 | LLM04 Supply chain | dependencies, CI | Python standard library only; the CI action is pinned to a commit and kept current by Dependabot; no LiteLLM (its PyPI releases were backdoored in March and October 2026) | CI | the Python install itself |
-| LLM06 Unbounded consumption | big notebooks, quotas, retries | at most 12 model calls per run (per document: 2 attempts at a usable answer and 2 repair rounds), each with a timeout and at most 2 retries; prompt size capped before the call; a daily-quota error is not retried and says when it resets; answers cached | `tests/test_pipeline.py`, `tests/test_providers.py` | |
+| LLM06 Unbounded consumption | big notebooks, quotas, retries | at most 12 model calls per run (per document: 2 attempts at a usable answer and 2 repair rounds), each with a timeout and at most 2 retries; prompt size capped before the call; a rate limit waits as long as the provider asks; a daily-quota error is not retried and says when it resets; answers cached | `tests/test_pipeline.py`, `tests/test_providers.py` | |
 | LLM07 Misinformation | the model's reading of the code | validator, honest statuses, repair, coverage of static red flags, golden-set recall, `harness verify` for documents that drift from the code | `tests/test_pipeline.py`, `harness eval` | right citation, wrong reading (see above) |
 | LLM08 Hidden context exposure | the prompt | nothing in the context is secret: the prompts are in this repo and the notebook is redacted before it goes in | | |
 | LLM10 Improper output handling | model text in Markdown and the UI | model text rendered as plain text, so no links, images or HTML (an image URL could carry code to another server when the document is opened); code fences longer than any backtick run; UI built with `textContent` under a strict CSP | `tests/test_security.py`, red-team `markdown_exfil` | `docs.json` holds raw model text; treat it as data |
@@ -146,7 +146,7 @@ python3 -m harness eval RUN_DIR [--readme README.md]  # golden-set recall; optio
 python3 -m harness verify RUN_DIR --notebook FILE     # re-check saved claims against the notebook now
 python3 -m harness redteam                            # the ten attack notebooks
 python3 -m harness mcp                                # MCP server for coding agents
-python3 -m unittest                                   # 85 tests, no network, no keys
+python3 -m unittest                                   # 86 tests, no network, no keys
 ```
 
 ## Design decisions
