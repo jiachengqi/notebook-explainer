@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Notebook Explainer</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="bar">
+    <div class="brand">Notebook Explainer <span class="sub">cited docs for notebooks</span></div>
+    <form id="load-form" class="load">
+      <input id="path" type="text" spellcheck="false" autocomplete="off"
+             placeholder="Path to a notebook on this computer, e.g. ~/Downloads/notebook.py">
+      <button type="submit">Load</button>
+      <label class="file-btn">Choose file…
+        <input id="file" type="file" accept=".py,.sql,.scala,.r,.ipynb,.txt" hidden>
+      </label>
+    </form>
+    <div class="gen">
+      <label class="field">Provider <select id="provider"></select></label>
+      <label class="field">Model <input id="model" type="text" spellcheck="false"></label>
+      <label class="chk"><input id="use-cache" type="checkbox" checked> cache</label>
+      <button id="generate" class="primary" disabled>Generate</button>
+    </div>
+  </header>
+  <div id="banner" class="banner" hidden></div>
+  <main>
+    <section class="left">
+      <nav class="tabs" id="tabs">
+        <button data-tab="overview" class="active">Overview</button>
+        <button data-tab="manager">Manager</button>
+        <button data-tab="developer">Developer</button>
+        <button data-tab="agent">AI agent</button>
+        <button data-tab="report">Validation report</button>
+      </nav>
+      <div id="panel" class="panel">
+        <div class="empty">
+          <h2>Point it at a notebook</h2>
+          <p>Type a path or choose a file. The notebook is parsed and analysed locally, with no model; then
+             <b>Generate</b> writes three documents and checks every citation against the code.</p>
+        </div>
+      </div>
+    </section>
+    <section class="right">
+      <div class="code-head"><span id="code-title">No notebook loaded</span><span id="code-sel"></span></div>
+      <div id="code" class="code"></div>
+    </section>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+{
+ "notebook": "cash_application_engine.py",
+ "how_scored": "An item is found in a document when a claim cites a line overlapping one of its spans and its text contains one of its keywords.",
+ "items": [
+  {
+   "id": "G01-ref-any-customer",
+   "what": "REF pays referenced invoices with no customer, entity or dispute check",
+   "spans": [
+    "C26:L1-15"
+   ],
+   "keywords": [
+    "customer",
+    "pool",
+    "entity",
+    "company",
+    "disput",
+    "any invoice",
+    "whoever"
+   ]
+  },
+  {
+   "id": "G02-override-ignored",
+   "what": "Manual override only sets the customer; REF still pays the referenced invoice",
+   "spans": [
+    "C14:L2",
+    "C26:L1-15"
+   ],
+   "keywords": [
+    "override"
+   ]
+  },
+  {
+   "id": "G03-ambiguous-name",
+   "what": "Ambiguous payer names resolve to an arbitrary customer (dropDuplicates)",
+   "spans": [
+    "C13:L5-6",
+    "C19:L7",
+    "C11:L1-4"
+   ],
+   "keywords": [
+    "ambiguous",
+    "arbitrary",
+    "more than one",
+    "multiple",
+    "duplicate",
+    "non-determin",
+    "nondetermin"
+   ]
+  },
+  {
+   "id": "G04-fifo-largest-first",
+   "what": "The 'FIFO' step pays the largest open balances first, not the oldest",
+   "spans": [
+    "C26:L34-35",
+    "C15:L3",
+    "C15:L11"
+   ],
+   "keywords": [
+    "largest",
+    "biggest",
+    "descending",
+    "balance",
+    "not oldest",
+    "fifo"
+   ]
+  },
+  {
+   "id": "G05-order-dependency",
+   "what": "Receipts are processed in value-date order against shared balances; earlier receipts can consume referenced invoices",
+   "spans": [
+    "C30:L2",
+    "C30:L3-17",
+    "C25:L1"
+   ],
+   "keywords": [
+    "order",
+    "earlier",
+    "sequence",
+    "value date",
+    "first"
+   ]
+  },
+  {
+   "id": "G06-cross-entity",
+   "what": "EXACT/FIFO search the customer pool across legal entities",
+   "spans": [
+    "C26:L17-43",
+    "C9:L2",
+    "C18:L5"
+   ],
+   "keywords": [
+    "entity",
+    "entities",
+    "company",
+    "co_cd",
+    "intercompany"
+   ]
+  },
+  {
+   "id": "G07-tol-reassigned",
+   "what": "TOL is reassigned from 0.5 to 5.0 in C29",
+   "spans": [
+    "C29:L4",
+    "C4:L1"
+   ],
+   "keywords": [
+    "tol",
+    "toleran",
+    "5.0",
+    "reassign",
+    "overrid"
+   ]
+  },
+  {
+   "id": "G08-max-wo-unused",
+   "what": "MAX_WO is declared but never enforced",
+   "spans": [
+    "C4:L2"
+   ],
+   "keywords": [
+    "max_wo",
+    "cap",
+    "never",
+    "unused",
+    "not enforced",
+    "not applied"
+   ]
+  },
+  {
+   "id": "G09-silent-drops",
+   "what": "Negative receipts, unknown bank accounts and credit notes are dropped without a count",
+   "spans": [
+    "C7:L1",
+    "C7:L4",
+    "C8:L5"
+   ],
+   "keywords": [
+    "drop",
+    "negative",
+    "unknown",
+    "silent",
+    "filter",
+    "excluded",
+    "credit",
+    "removed"
+   ]
+  },
+  {
+   "id": "G10-missing-fx",
+   "what": "A missing FX rate leaves the USD amount null and the receipt can vanish",
+   "spans": [
+    "C18:L1-3",
+    "C18:L5-8",
+    "C30:L5"
+   ],
+   "keywords": [
+    "fx",
+    "rate",
+    "null",
+    "nan",
+    "missing"
+   ]
+  },
+  {
+   "id": "G11-checks-only-print",
+   "what": "Checks only print and do not stop the run; exit is always ok",
+   "spans": [
+    "C19:L9-10",
+    "C34:L4-7",
+    "C41:L7-8",
+    "C47:L1"
+   ],
+   "keywords": [
+    "print",
+    "does not stop",
+    "doesn't stop",
+    "warning",
+    "ok",
+    "success",
+    "fail"
+   ]
+  },
+  {
+   "id": "G12-recon-plug",
+   "what": "Rounding differences are plugged into the last line, so the recon passes by construction",
+   "spans": [
+    "C32:L1-9"
+   ],
+   "keywords": [
+    "plug",
+    "rounding",
+    "last line",
+    "adjust",
+    "differen"
+   ]
+  },
+  {
+   "id": "G13-dry-run-email",
+   "what": "notify_ar and log_run run even in dry runs",
+   "spans": [
+    "C43:L11",
+    "C44:L1"
+   ],
+   "keywords": [
+    "dry"
+   ]
+  },
+  {
+   "id": "G14-overwrite",
+   "what": "Tables are overwritten each run (history and other entities lost)",
+   "spans": [
+    "C37:L2",
+    "C38:L9"
+   ],
+   "keywords": [
+    "overwrite",
+    "replace"
+   ]
+  },
+  {
+   "id": "G15-run-dependency",
+   "what": "get_gl_map, notify_ar, log_run come from %run ../shared/fin_utils",
+   "spans": [
+    "C5:L1",
+    "C33:L3",
+    "C43:L11",
+    "C44:L1"
+   ],
+   "keywords": [
+    "fin_utils",
+    "%run",
+    "external",
+    "outside",
+    "not defined"
+   ]
+  },
+  {
+   "id": "G16-global-state",
+   "what": "Global mutable bal makes the notebook order-dependent and not re-runnable cell by cell",
+   "spans": [
+    "C25:L1-6",
+    "C26:L1-56"
+   ],
+   "keywords": [
+    "global",
+    "state",
+    "re-run",
+    "rerun",
+    "mutat",
+    "in order"
+   ]
+  },
+  {
+   "id": "G17-value-date-fx",
+   "what": "Value-date FX is computed but unused (commented out); latest rate is used",
+   "spans": [
+    "C17:L1-4",
+    "C18:L2",
+    "C16:L4-5"
+   ],
+   "keywords": [
+    "value date",
+    "value-date",
+    "latest",
+    "fx2",
+    "commented",
+    "unused"
+   ]
+  },
+  {
+   "id": "G18-dead-code",
+   "what": "Dead code: v2 matching, fuzzy matching, alloc_by_aging",
+   "spans": [
+    "C15:L1-18",
+    "C20:L1-22",
+    "C23:L1-20"
+   ],
+   "keywords": [
+    "dead",
+    "commented",
+    "unused",
+    "never called",
+    "v2",
+    "fuzzy",
+    "legacy"
+   ]
+  },
+  {
+   "id": "G19-name-normaliser",
+   "what": "Suffix stripping is substring-based and can corrupt names",
+   "spans": [
+    "C10:L6-7"
+   ],
+   "keywords": [
+    "suffix",
+    "substring",
+    "normal",
+    "strip"
+   ]
+  },
+  {
+   "id": "G20-dispute-ref",
+   "what": "Disputed invoices are skipped by EXACT/FIFO but can still be paid by REF",
+   "spans": [
+    "C26:L1-15",
+    "C26:L20",
+    "C26:L34"
+   ],
+   "keywords": [
+    "disput"
+   ]
+  },
+  {
+   "id": "G21-driver-scale",
+   "what": "toPandas and row loops on the driver limit scale",
+   "spans": [
+    "C24:L1-2",
+    "C30:L3"
+   ],
+   "keywords": [
+    "topandas",
+    "driver",
+    "memory",
+    "scale",
+    "pandas"
+   ]
+  },
+  {
+   "id": "G22-dq-cannot-fire",
+   "what": "rcpt_no_dt counts null dates after they were already filtered out",
+   "spans": [
+    "C19:L3",
+    "C7:L1"
+   ],
+   "keywords": [
+    "rcpt_no_dt",
+    "always",
+    "never",
+    "null date",
+    "already"
+   ]
+  },
+  {
+   "id": "G23-excluded-customers",
+   "what": "Excluded customers are hard-coded without explanation",
+   "spans": [
+    "C4:L5",
+    "C8:L6"
+   ],
+   "keywords": [
+    "exclud",
+    "hard-coded",
+    "hardcoded",
+    "c10077"
+   ]
+  },
+  {
+   "id": "G24-date-formats",
+   "what": "Value dates parse yyyy-MM-dd or dd/MM/yyyy only",
+   "spans": [
+    "C6:L3"
+   ],
+   "keywords": [
+    "dd/mm",
+    "format",
+    "date"
+   ]
+  },
+  {
+   "id": "G25-aging-append",
+   "what": "Aging snapshot is appended, so re-runs duplicate rows",
+   "spans": [
+    "C39:L9"
+   ],
+   "keywords": [
+    "append",
+    "duplicate"
+   ]
+  },
+  {
+   "id": "G26-sql-reads-table",
+   "what": "The SQL cells read the real table, so in a dry run they show the previous run",
+   "spans": [
+    "C45:L1-2",
+    "C46:L1-3"
+   ],
+   "keywords": [
+    "dry",
+    "previous",
+    "last run",
+    "stale",
+    "not this run"
+   ]
+  }
+ ]
+}

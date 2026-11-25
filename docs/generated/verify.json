@@ -1,0 +1,402 @@
+{
+ "checked_at": "2026-11-24T23:42:18+00:00",
+ "notebook": {
+  "name": "cash_application_engine.py",
+  "format": "databricks-python",
+  "sha256": "997b9d0c2ab16af3df31bfafbcc471a8af1a18a96dc9fd9796bea425da11f5bf",
+  "cells": 47,
+  "cell_lines": 412,
+  "file_lines": 551,
+  "languages": {
+   "md": 1,
+   "python": 43,
+   "run": 1,
+   "sql": 2
+  },
+  "path": "samples/cash_application_engine.py"
+ },
+ "notebook_changed": false,
+ "documents": {
+  "developer": {
+   "before": {
+    "claims": 43,
+    "verified": 41,
+    "partial": 2,
+    "unchecked": 0,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 0,
+    "static_added": 0,
+    "citations": 88
+   },
+   "after": {
+    "claims": 43,
+    "verified": 35,
+    "partial": 1,
+    "unchecked": 7,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 0,
+    "static_added": 0,
+    "citations": 88
+   }
+  },
+  "agent": {
+   "before": {
+    "claims": 38,
+    "verified": 36,
+    "partial": 2,
+    "unchecked": 0,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 0,
+    "static_added": 2,
+    "citations": 60
+   },
+   "after": {
+    "claims": 38,
+    "verified": 32,
+    "partial": 2,
+    "unchecked": 4,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 0,
+    "static_added": 2,
+    "citations": 60
+   }
+  },
+  "manager": {
+   "before": {
+    "claims": 18,
+    "verified": 18,
+    "partial": 0,
+    "unchecked": 0,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 1,
+    "static_added": 0,
+    "citations": 33
+   },
+   "after": {
+    "claims": 18,
+    "verified": 9,
+    "partial": 0,
+    "unchecked": 9,
+    "unverified": 0,
+    "invalid": 0,
+    "dropped": 0,
+    "repaired": 1,
+    "static_added": 0,
+    "citations": 33
+   }
+  }
+ },
+ "changes": [
+  {
+   "document": "developer",
+   "id": "d4",
+   "before": "partial",
+   "after": "verified",
+   "text": "Delta table writes to `fin_cash.alloc_lines`, `fin_cash.open_items_after`, and `fin_cash.ar_aging_snap` only occur when `dry` equals 'N'.",
+   "citations": [
+    "C37:L1-2",
+    "C38:L8-9",
+    "C39:L8-9"
+   ],
+   "problems": []
+  },
+  {
+   "document": "developer",
+   "id": "d5",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Configuration parameters, partition settings, and external utility imports are established across Cells 3 through 5.",
+   "citations": [
+    "C3:L1-4",
+    "C4:L8",
+    "C5:L1"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d6",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Receipts, open items, customer metadata, and FX rates are loaded and standardized in Cells 6 through 18.",
+   "citations": [
+    "C6:L1",
+    "C8:L1",
+    "C9:L1",
+    "C16:L1",
+    "C18:L1-7"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d7",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Customer resolution occurs in Cells 10 through 14 via UDF regex normalization, remit text references, and overrides.",
+   "citations": [
+    "C10:L1-18",
+    "C13:L1-9",
+    "C14:L1-7"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d8",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Data is converted to pandas in Cell 24 for sequential matching across Cells 26 and 30.",
+   "citations": [
+    "C24:L1-2",
+    "C26:L1-50",
+    "C30:L1-18"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d9",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Allocation lines and balances are formatted, verified, and optionally persisted in Cells 31 through 39.",
+   "citations": [
+    "C31:L1-6",
+    "C34:L1-5",
+    "C36:L10-11",
+    "C37:L1-2",
+    "C38:L6-9"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d10",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Reporting, notifications, execution logging, and notebook exit are handled in Cells 40 through 47.",
+   "citations": [
+    "C40:L1-7",
+    "C43:L4-11",
+    "C44:L1",
+    "C47:L1"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "developer",
+   "id": "d42",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Reconciliation break checks only print warning messages to standard output and do not abort the run.",
+   "citations": [
+    "C34:L5-7",
+    "C41:L7-8"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "agent",
+   "id": "a12",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Receipt lines cannot allocate more than the remaining open balance of an invoice.",
+   "citations": [
+    "C26:L11",
+    "C26:L25",
+    "C26:L39"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "agent",
+   "id": "a14",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Company-level receipt totals must reconcile with line totals across all companies.",
+   "citations": [
+    "C41:L1-8"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "agent",
+   "id": "a21",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Company reconciliation break check only prints a message without halting execution.",
+   "citations": [
+    "C41:L7-8"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "agent",
+   "id": "a36",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Compare allocation type totals and counts generated in cell 34 before and after modifying matching logic.",
+   "citations": [
+    "C34:L8-9"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m1",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "The process ingests bank receipts, customer accounts, and open invoices from CSV storage paths.",
+   "citations": [
+    "C6:L1",
+    "C8:L1",
+    "C9:L1"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m2",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Receipts are matched against invoices using remittance reference numbers, exact amount matches, or oldest unpaid items first.",
+   "citations": [
+    "C30:L7",
+    "C30:L9",
+    "C30:L11"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m4",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "An aging snapshot table is updated with current invoice balances using append mode.",
+   "citations": [
+    "C39:L8-9"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m6",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Receipts and open items are converted to US Dollars using exchange rates before matching balances.",
+   "citations": [
+    "C18:L3",
+    "C18:L7"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m9",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Receipt funds that cannot be tied to an identified customer account are allocated to suspense.",
+   "citations": [
+    "C30:L16-17"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m12",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Company reconciliation breaks are detected and printed after data has already been permanently overwritten to disk.",
+   "citations": [
+    "C37:L1-2",
+    "C41:L7-8"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m14",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "The pipeline notebook always reports success upon exiting even if reconciliation discrepancies or unmatched receipts occurred.",
+   "citations": [
+    "C47:L1"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m15",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Duplicate bank receipt identifiers are detected only with a console printout, allowing duplicated transactions to proceed into allocation.",
+   "citations": [
+    "C19:L9-10"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  },
+  {
+   "document": "manager",
+   "id": "m17",
+   "before": "verified",
+   "after": "unchecked",
+   "text": "Should the pipeline abort rather than overwrite production financial tables when company-level reconciliation breaks occur?",
+   "citations": [
+    "C37:L2",
+    "C41:L7-8"
+   ],
+   "problems": [
+    "only the quote was checked: the claim names nothing in the code"
+   ]
+  }
+ ],
+ "worse": 20
+}

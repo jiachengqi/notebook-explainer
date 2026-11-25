@@ -1,0 +1,187 @@
+{
+ "title": "Cash application: what it does and what could go wrong",
+ "sections": [
+  {
+   "heading": "What this notebook does",
+   "claims": [
+    {
+     "text": "It matches incoming customer payments to open invoices for four legal entities: DK01, IN02, SG01 and US01.",
+     "kind": "fact",
+     "citations": [
+      "C4:L4"
+     ],
+     "evidence": "bk = {\"DB-4471\": \"DK01\""
+    },
+    {
+     "text": "It reads bank receipts, open invoices, the customer master, FX rates and manual overrides from CSV files.",
+     "kind": "fact",
+     "citations": [
+      "C6:L1",
+      "C8:L1",
+      "C9:L1",
+      "C16:L1",
+      "C13:L8"
+     ],
+     "evidence": "csv(src + \"bank_receipts.csv\")"
+    },
+    {
+     "text": "The payer is identified from a manual override first, then from an invoice number in the payment text, then from the payer's name.",
+     "kind": "fact",
+     "citations": [
+      "C14:L2"
+     ],
+     "evidence": "F.coalesce(\"c_ov\", \"c_ref\", \"c_nm\")"
+    },
+    {
+     "text": "Invoice numbers are recognised as 8-digit numbers that start with 9.",
+     "kind": "fact",
+     "citations": [
+      "C10:L16"
+     ],
+     "evidence": "(9\\d{7})"
+    },
+    {
+     "text": "Amounts are converted to USD at the rate on the payment's value date.",
+     "kind": "fact",
+     "citations": [
+      "C17:L1"
+     ],
+     "evidence": "F.col(\"rate_dt\") <= F.col(\"val_dt\")"
+    }
+   ]
+  },
+  {
+   "heading": "The business rules",
+   "claims": [
+    {
+     "text": "A payment is applied first to the invoices it names, up to their open balance.",
+     "kind": "fact",
+     "citations": [
+      "C26:L1-15"
+     ],
+     "evidence": "a = min(rem, bal[d])"
+    },
+    {
+     "text": "If it names no invoice, it is matched to one open invoice with the same amount, within 0.01 USD.",
+     "kind": "fact",
+     "citations": [
+      "C26:L20"
+     ],
+     "evidence": "abs(bal[d] - rem) <= EX_TOL"
+    },
+    {
+     "text": "The rest is spread over the customer group's invoices, largest balance first, although the step is labelled FIFO.",
+     "kind": "risk",
+     "citations": [
+      "C26:L35"
+     ],
+     "evidence": "key=lambda d: -bal[d]"
+    },
+    {
+     "text": "Leftover invoice balances of up to 5 USD are written off.",
+     "kind": "fact",
+     "citations": [
+      "C26:L48",
+      "C29:L4"
+     ],
+     "evidence": "bal[d] <= TOL"
+    },
+    {
+     "text": "Whatever cannot be matched stays as unapplied cash if the customer is known, otherwise it goes to suspense.",
+     "kind": "fact",
+     "citations": [
+      "C30:L13-17"
+     ],
+     "evidence": "lines.append([rid, \"SUSP\", None, rem])"
+    }
+   ]
+  },
+  {
+   "heading": "What could go wrong",
+   "claims": [
+    {
+     "text": "The settings say the write-off limit is 0.5, but a later cell raises it to 5.0.",
+     "kind": "risk",
+     "citations": [
+      "C4:L1",
+      "C29:L4"
+     ],
+     "evidence": "TOL = 5.0"
+    },
+    {
+     "text": "A write-off cap of 250 is defined but never applied.",
+     "kind": "risk",
+     "citations": [
+      "C4:L2"
+     ],
+     "evidence": "MAX_WO = 250.0"
+    },
+    {
+     "text": "A dry run still sends the AR summary email.",
+     "kind": "risk",
+     "citations": [
+      "C43:L11",
+      "C37:L1"
+     ],
+     "evidence": "notify_ar(h)"
+    },
+    {
+     "text": "Every production run overwrites the allocation table, so earlier results are lost.",
+     "kind": "risk",
+     "citations": [
+      "C37:L2"
+     ],
+     "evidence": "mode(\"overwrite\")"
+    },
+    {
+     "text": "Reconciliation breaks are only printed, and the run still reports success.",
+     "kind": "risk",
+     "citations": [
+      "C41:L7-8",
+      "C47:L1"
+     ],
+     "evidence": "print(\"CO RECON BREAK\")"
+    },
+    {
+     "text": "Payments above 1,000,000 USD need a second approval.",
+     "kind": "fact",
+     "citations": [
+      "C4:L2"
+     ],
+     "evidence": "MAX_WO = 250.0"
+    },
+    {
+     "text": "Receipts with negative amounts or from unknown bank accounts are dropped without being reported.",
+     "kind": "risk",
+     "citations": [
+      "C7:L1",
+      "C7:L4"
+     ],
+     "evidence": "F.col(\"amt\") > 0"
+    }
+   ]
+  },
+  {
+   "heading": "Questions for the owner",
+   "claims": [
+    {
+     "text": "Which write-off limit is intended: 0.5 or 5.0 USD?",
+     "kind": "question",
+     "citations": [
+      "C4:L1",
+      "C29:L4"
+     ],
+     "evidence": "TOL = 0.5"
+    },
+    {
+     "text": "Should a payment that names another customer's invoice be applied to it?",
+     "kind": "question",
+     "citations": [
+      "C26:L4-14"
+     ],
+     "evidence": "for d in refs:"
+    }
+   ]
+  }
+ ]
+}

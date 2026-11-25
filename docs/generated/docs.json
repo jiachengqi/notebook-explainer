@@ -1,0 +1,1683 @@
+{
+ "developer": {
+  "title": "Cash Application Engine Maintenance Guide",
+  "sections": [
+   {
+    "heading": "Purpose and run modes",
+    "claims": [
+     {
+      "text": "The notebook creates text input widgets `src` defaulting to '/mnt/fin-raw/cashapp/' and `run_dt` defaulting to empty string.",
+      "kind": "fact",
+      "citations": [
+       "C3:L1",
+       "C3:L2"
+      ],
+      "evidence": "dbutils.widgets.text(\"src\", \"/mnt/fin-raw/cashapp/\")",
+      "shape_problems": [],
+      "id": "d1",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Dropdown widgets `co` defaulting to 'ALL' and `dry` defaulting to 'Y' are configured for company code filtering and execution mode.",
+      "kind": "fact",
+      "citations": [
+       "C3:L3",
+       "C3:L4"
+      ],
+      "evidence": "dbutils.widgets.dropdown(\"dry\", \"Y\", [\"Y\", \"N\"])",
+      "shape_problems": [],
+      "id": "d2",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "If `run_dt` is passed as an empty string, it defaults to the current system date as a string.",
+      "kind": "fact",
+      "citations": [
+       "C3:L8-9"
+      ],
+      "evidence": "run_dt = str(datetime.date.today())",
+      "shape_problems": [],
+      "id": "d3",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Delta table writes to `fin_cash.alloc_lines`, `fin_cash.open_items_after`, and `fin_cash.ar_aging_snap` only occur when `dry` equals 'N'.",
+      "kind": "fact",
+      "citations": [
+       "C37:L1-2",
+       "C38:L8-9",
+       "C39:L8-9"
+      ],
+      "evidence": "if dry == \"N\":",
+      "shape_problems": [],
+      "id": "d4",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Structure",
+    "claims": [
+     {
+      "text": "Configuration parameters, partition settings, and external utility imports are established across Cells 3 through 5.",
+      "kind": "fact",
+      "citations": [
+       "C3:L1-4",
+       "C4:L8",
+       "C5:L1"
+      ],
+      "evidence": "%run ../shared/fin_utils",
+      "shape_problems": [],
+      "id": "d5",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipts, open items, customer metadata, and FX rates are loaded and standardized in Cells 6 through 18.",
+      "kind": "fact",
+      "citations": [
+       "C6:L1",
+       "C8:L1",
+       "C9:L1",
+       "C16:L1",
+       "C18:L1-7"
+      ],
+      "evidence": "spark.read.option(\"header\", True).csv",
+      "shape_problems": [],
+      "id": "d6",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Customer resolution occurs in Cells 10 through 14 via UDF regex normalization, remit text references, and overrides.",
+      "kind": "fact",
+      "citations": [
+       "C10:L1-18",
+       "C13:L1-9",
+       "C14:L1-7"
+      ],
+      "evidence": "rr = rr.withColumn(\"cust\", F.coalesce(\"c_ov\", \"c_ref\", \"c_nm\"))",
+      "shape_problems": [],
+      "id": "d7",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Data is converted to pandas in Cell 24 for sequential matching across Cells 26 and 30.",
+      "kind": "fact",
+      "citations": [
+       "C24:L1-2",
+       "C26:L1-50",
+       "C30:L1-18"
+      ],
+      "evidence": "toPandas()",
+      "shape_problems": [],
+      "id": "d8",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Allocation lines and balances are formatted, verified, and optionally persisted in Cells 31 through 39.",
+      "kind": "fact",
+      "citations": [
+       "C31:L1-6",
+       "C34:L1-5",
+       "C36:L10-11",
+       "C37:L1-2",
+       "C38:L6-9"
+      ],
+      "evidence": "oa.write.format(\"delta\").mode(\"overwrite\")",
+      "shape_problems": [],
+      "id": "d9",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Reporting, notifications, execution logging, and notebook exit are handled in Cells 40 through 47.",
+      "kind": "fact",
+      "citations": [
+       "C40:L1-7",
+       "C43:L4-11",
+       "C44:L1",
+       "C47:L1"
+      ],
+      "evidence": "notify_ar(h)",
+      "shape_problems": [],
+      "id": "d10",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Data flow",
+    "claims": [
+     {
+      "text": "Source data is ingested from CSV files `bank_receipts.csv`, `open_items.csv`, `customers.csv`, `ar_overrides.csv`, and `fx_rates.csv` under path `src`.",
+      "kind": "fact",
+      "citations": [
+       "C6:L1",
+       "C8:L1",
+       "C9:L1",
+       "C13:L8",
+       "C16:L1"
+      ],
+      "evidence": "src + \"ar_overrides.csv\"",
+      "shape_problems": [],
+      "id": "d11",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "DataFrame `rr` is created by enriching receipt DataFrame `r` with overrides `ov`, reference-matched customers `x1`, name-matched aliases `x2`, and exchange rates `fx1`.",
+      "kind": "fact",
+      "citations": [
+       "C14:L1",
+       "C18:L1-3"
+      ],
+      "evidence": "rr = r.join(ov, \"rcpt_id\", \"left\").join(x1, \"rcpt_id\", \"left\").join(x2, \"rcpt_id\", \"left\")",
+      "shape_problems": [],
+      "id": "d12",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Open items DataFrame `oi` is enriched with customer pool metadata and FX rates into DataFrame `oi2`.",
+      "kind": "fact",
+      "citations": [
+       "C18:L5-7"
+      ],
+      "evidence": "oi2 = oi.join(cm.select(\"cust_no\", \"pool\"), \"cust_no\", \"left\")",
+      "shape_problems": [],
+      "id": "d13",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "DataFrames `rr` and `oi2` are transformed into pandas DataFrames `rp` and `ip`.",
+      "kind": "fact",
+      "citations": [
+       "C24:L1-2"
+      ],
+      "evidence": "rp = rr.select(\"rcpt_id\", \"val_dt\", \"amt\", \"ccy\", \"r_rate\", \"amt_usd\", \"cust\", \"pool\", \"refs\", \"co\", \"id_src\", \"payer_nm\").toPandas()",
+      "shape_problems": [],
+      "id": "d14",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The iterative allocation engine processes rows of `rp` into Python list `lines`, which is then converted into pandas DataFrame `ln` and Spark DataFrame `out`.",
+      "kind": "fact",
+      "citations": [
+       "C30:L1-17",
+       "C31:L1",
+       "C36:L10"
+      ],
+      "evidence": "out = spark.createDataFrame(o.values.tolist(), sch)",
+      "shape_problems": [],
+      "id": "d15",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "DataFrame `oa` is derived from updated balance values mapped back to `ip`.",
+      "kind": "fact",
+      "citations": [
+       "C38:L1-6"
+      ],
+      "evidence": "ip[\"open_usd_after\"] = ip.doc_no.map(bal)",
+      "shape_problems": [],
+      "id": "d16",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "DataFrame `snap` is computed using function `aging_rpt` on remaining open balances in `ag`.",
+      "kind": "fact",
+      "citations": [
+       "C39:L1-4"
+      ],
+      "evidence": "snap = aging_rpt(ag, run_dt).reset_index()",
+      "shape_problems": [],
+      "id": "d17",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Business rules",
+    "claims": [
+     {
+      "text": "Receipts are mapped to company codes via dictionary `bk` mapping 'DB-4471' to 'DK01', 'HDFC-0932' to 'IN02', 'DBS-1180' to 'SG01', and 'JPM-2290' to 'US01'.",
+      "kind": "fact",
+      "citations": [
+       "C4:L4",
+       "C7:L2-3"
+      ],
+      "evidence": "bk = {\"DB-4471\": \"DK01\", \"HDFC-0932\": \"IN02\", \"DBS-1180\": \"SG01\", \"JPM-2290\": \"US01\"}",
+      "shape_problems": [],
+      "id": "d18",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Open item records are excluded if their `cust_no` belongs to `EXCL`, which contains 'C10077' and 'C10412'.",
+      "kind": "fact",
+      "citations": [
+       "C4:L5",
+       "C8:L6"
+      ],
+      "evidence": "EXCL = [\"C10077\", \"C10412\"]",
+      "shape_problems": [],
+      "id": "d19",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Reference extraction `get_refs` identifies 8-digit strings starting with 9 using regular expression `(?<!\\d)(9\\d{7})(?!\\d)`.",
+      "kind": "fact",
+      "citations": [
+       "C10:L16",
+       "C10:L18"
+      ],
+      "evidence": "re.findall(r\"(?<!\\d)(9\\d{7})(?!\\d)\", t)",
+      "shape_problems": [],
+      "id": "d20",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipt customer assignment prioritizes manual override 'OV', followed by reference match 'REF', and name match 'NM'.",
+      "kind": "fact",
+      "citations": [
+       "C14:L2-6"
+      ],
+      "evidence": "rr = rr.withColumn(\"cust\", F.coalesce(\"c_ov\", \"c_ref\", \"c_nm\"))",
+      "shape_problems": [],
+      "id": "d21",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Exact matching applies when open invoice balance matches remaining receipt amount within tolerance `EX_TOL` of 0.01 and invoice is undisputed.",
+      "kind": "fact",
+      "citations": [
+       "C4:L3",
+       "C26:L20"
+      ],
+      "evidence": "meta[d][\"dispute\"] == 0 and bal[d] > 0 and abs(bal[d] - rem) <= EX_TOL",
+      "shape_problems": [],
+      "id": "d22",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "FIFO allocation iterates through undisputed positive balance invoices in descending order of current balance.",
+      "kind": "fact",
+      "citations": [
+       "C26:L34-35"
+      ],
+      "evidence": "ds = sorted(ds, key=lambda d: -bal[d])",
+      "shape_problems": [],
+      "id": "d23",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Write-offs `WO` clear open balances on touched documents if the remaining balance is greater than 0.005 and less than or equal to `TOL`.",
+      "kind": "fact",
+      "citations": [
+       "C26:L48-50"
+      ],
+      "evidence": "if bal[d] > 0.005 and bal[d] <= TOL:",
+      "shape_problems": [],
+      "id": "d24",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Residual receipt amounts greater than 0.005 are classified as 'UNAPP' when customer is known, or 'SUSP' when unknown.",
+      "kind": "fact",
+      "citations": [
+       "C30:L13-17"
+      ],
+      "evidence": "lines.append([rid, \"SUSP\", None, rem])",
+      "shape_problems": [],
+      "id": "d25",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "External dependencies",
+    "claims": [
+     {
+      "text": "The notebook executes external code file `../shared/fin_utils` using `%run`.",
+      "kind": "external",
+      "citations": [
+       "C5:L1"
+      ],
+      "evidence": "%run ../shared/fin_utils",
+      "shape_problems": [],
+      "id": "d26",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Function `get_gl_map` is invoked to map company code and line type to general ledger accounts but is not defined in this notebook.",
+      "kind": "external",
+      "citations": [
+       "C33:L3"
+      ],
+      "evidence": "gm[c] = get_gl_map(c)",
+      "shape_problems": [],
+      "id": "d27",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Function `notify_ar` is invoked to send HTML summary alerts but is not defined in this notebook.",
+      "kind": "external",
+      "citations": [
+       "C43:L11"
+      ],
+      "evidence": "notify_ar(h)",
+      "shape_problems": [],
+      "id": "d28",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Function `log_run` is invoked to record execution metadata but is not defined in this notebook.",
+      "kind": "external",
+      "citations": [
+       "C44:L1"
+      ],
+      "evidence": "log_run(\"cash_app_v3\", run_dt",
+      "shape_problems": [],
+      "id": "d29",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "SQL queries in Cells 45 and 46 directly query external Metastore table `fin_cash.alloc_lines`.",
+      "kind": "fact",
+      "citations": [
+       "C45:L2",
+       "C46:L3"
+      ],
+      "evidence": "select typ, count(*), round(sum(amt_usd),2) from fin_cash.alloc_lines",
+      "shape_problems": [],
+      "id": "d30",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "It is unknown how `get_gl_map`, `notify_ar`, and `log_run` handle exceptions or missing values because their definitions reside in `../shared/fin_utils`.",
+      "kind": "question",
+      "citations": [
+       "C5:L1",
+       "C33:L3",
+       "C43:L11",
+       "C44:L1"
+      ],
+      "evidence": "%run ../shared/fin_utils",
+      "shape_problems": [],
+      "id": "d31",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Outputs and side effects",
+    "claims": [
+     {
+      "text": "When `dry` equals 'N', DataFrame `out` overwrites Delta table `fin_cash.alloc_lines` with `overwriteSchema` set to 'true'.",
+      "kind": "fact",
+      "citations": [
+       "C4:L6",
+       "C37:L1-2"
+      ],
+      "evidence": "out.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").saveAsTable(tgt)",
+      "shape_problems": [],
+      "id": "d32",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "When `dry` equals 'N', DataFrame `oa` overwrites Delta table `fin_cash.open_items_after`.",
+      "kind": "fact",
+      "citations": [
+       "C38:L8-9"
+      ],
+      "evidence": "oa.write.format(\"delta\").mode(\"overwrite\").saveAsTable(\"fin_cash.open_items_after\")",
+      "shape_problems": [],
+      "id": "d33",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "When `dry` equals 'N', DataFrame `snap` appends records to Delta table `fin_cash.ar_aging_snap`.",
+      "kind": "fact",
+      "citations": [
+       "C39:L8-9"
+      ],
+      "evidence": "spark.createDataFrame(snap).write.format(\"delta\").mode(\"append\").saveAsTable(\"fin_cash.ar_aging_snap\")",
+      "shape_problems": [],
+      "id": "d34",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Notification function `notify_ar` and logging function `log_run` execute regardless of whether `dry` is 'Y' or 'N'.",
+      "kind": "risk",
+      "citations": [
+       "C37:L1",
+       "C43:L11",
+       "C44:L1"
+      ],
+      "evidence": "notify_ar(h)",
+      "shape_problems": [],
+      "id": "d35",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The notebook always exits with a JSON payload reporting `\"status\": \"ok\"` even if reconciliation issues are detected.",
+      "kind": "risk",
+      "citations": [
+       "C47:L1"
+      ],
+      "evidence": "dbutils.notebook.exit(json.dumps({\"status\": \"ok\", \"rcpt\": len(rp), \"lines\": len(ln), \"bad\": len(bad)}))",
+      "shape_problems": [],
+      "id": "d36",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Gotchas",
+    "claims": [
+     {
+      "text": "`TOL` is initialized to 0.5 at Cell 4 line 1 and reassigned to 5.0 at Cell 29 line 4, altering write-off and FIFO thresholds.",
+      "kind": "risk",
+      "citations": [
+       "C4:L1",
+       "C29:L4"
+      ],
+      "evidence": "TOL = 5.0",
+      "shape_problems": [],
+      "id": "d37",
+      "origin": "model",
+      "status": "partial",
+      "problems": [
+       "FIFO does not appear in the cited lines (they read: 'TOL = 0.5'; 'TOL = 5.0')"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Constant `MAX_WO = 250.0` defined at Cell 4 line 2 is never referenced or enforced anywhere in the code.",
+      "kind": "fact",
+      "citations": [
+       "C4:L2"
+      ],
+      "evidence": "MAX_WO = 250.0",
+      "shape_problems": [],
+      "id": "d38",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Function `apply_fifo` sorts invoices by `-bal[d]`, meaning allocation applies largest-balance first rather than by invoice due date.",
+      "kind": "inference",
+      "citations": [
+       "C26:L35"
+      ],
+      "evidence": "ds = sorted(ds, key=lambda d: -bal[d])",
+      "shape_problems": [],
+      "id": "d39",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Function `alloc_by_aging` defined at Cell 23 lines 1 through 20 is never called.",
+      "kind": "fact",
+      "citations": [
+       "C23:L1-20"
+      ],
+      "evidence": "def alloc_by_aging(pdf_inv, amt, asof, buckets=[30, 60, 90]):",
+      "shape_problems": [],
+      "id": "d40",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "All receipt and open invoice data is brought into single-node driver memory via `toPandas`, creating an out-of-memory risk as transaction volume scales.",
+      "kind": "risk",
+      "citations": [
+       "C24:L1-2"
+      ],
+      "evidence": "rp = rr.select(\"rcpt_id\", \"val_dt\", \"amt\", \"ccy\", \"r_rate\", \"amt_usd\", \"cust\", \"pool\", \"refs\", \"co\", \"id_src\", \"payer_nm\").toPandas()",
+      "shape_problems": [],
+      "id": "d41",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Reconciliation break checks only print warning messages to standard output and do not abort the run.",
+      "kind": "risk",
+      "citations": [
+       "C34:L5-7",
+       "C41:L7-8"
+      ],
+      "evidence": "print(\"CO RECON BREAK\")",
+      "shape_problems": [],
+      "id": "d42",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Global dictionary `bal` is mutated across multiple function calls inside the allocation loop, introducing implicit state dependencies.",
+      "kind": "risk",
+      "citations": [
+       "C25:L1",
+       "C26:L12",
+       "C26:L26",
+       "C26:L40",
+       "C26:L50"
+      ],
+      "evidence": "bal[d] = bal[d] - a",
+      "shape_problems": [],
+      "id": "d43",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   }
+  ],
+  "audience": "developer",
+  "repair_rounds": 0,
+  "coverage": {
+   "flags_total": 16,
+   "flags_cited": 15,
+   "missing": [
+    "print-check:C19:L9-10"
+   ]
+  },
+  "stats": {
+   "claims": 43,
+   "verified": 35,
+   "partial": 1,
+   "unchecked": 7,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 0,
+   "static_added": 0,
+   "citations": 88
+  }
+ },
+ "agent": {
+  "title": "Cash Application Engine v3 Specification and Safeguards",
+  "sections": [
+   {
+    "heading": "Execution model",
+    "claims": [
+     {
+      "text": "The notebook reads parameters `src`, `run_dt`, `co`, and `dry` via dbutils widgets.",
+      "kind": "fact",
+      "citations": [
+       "C3:L1-4"
+      ],
+      "evidence": "dbutils.widgets.text(\"src\", \"/mnt/fin-raw/cashapp/\")",
+      "shape_problems": [],
+      "id": "a1",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "When `run_dt` is an empty string, the notebook sets `run_dt` to today's date.",
+      "kind": "fact",
+      "citations": [
+       "C3:L8-9"
+      ],
+      "evidence": "run_dt = str(datetime.date.today())",
+      "shape_problems": [],
+      "id": "a2",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The notebook executes an external notebook via `%run ../shared/fin_utils` before loading bank receipts.",
+      "kind": "external",
+      "citations": [
+       "C5:L1"
+      ],
+      "evidence": "%run ../shared/fin_utils",
+      "shape_problems": [],
+      "id": "a3",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The functions `get_gl_map`, `notify_ar`, and `log_run` are defined outside this notebook.",
+      "kind": "external",
+      "citations": [
+       "C5:L1",
+       "C33:L3",
+       "C43:L11",
+       "C44:L1"
+      ],
+      "evidence": "%run ../shared/fin_utils",
+      "shape_problems": [],
+      "id": "a4",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The engine pulls all matching receipt and open invoice rows into memory using Pandas `.toPandas()`.",
+      "kind": "fact",
+      "citations": [
+       "C24:L1-2"
+      ],
+      "evidence": ".toPandas()",
+      "shape_problems": [],
+      "id": "a5",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipts are processed sequentially by iterating over `rp` sorted by `val_dt` and `rcpt_id`.",
+      "kind": "fact",
+      "citations": [
+       "C30:L2-3"
+      ],
+      "evidence": "for i, x in rp.iterrows():",
+      "shape_problems": [],
+      "id": "a6",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The matching process modifies a single global balance dictionary `bal` across all allocation passes.",
+      "kind": "fact",
+      "citations": [
+       "C25:L1",
+       "C26:L12",
+       "C26:L26",
+       "C26:L40",
+       "C26:L50"
+      ],
+      "evidence": "bal[d] = bal[d] - a",
+      "shape_problems": [],
+      "id": "a7",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Invariants",
+    "claims": [
+     {
+      "text": "For every receipt, non-write-off line amounts in receipt currency (`amt_rc`) must sum to the original receipt amount `amt`.",
+      "kind": "fact",
+      "citations": [
+       "C34:L1-4"
+      ],
+      "evidence": "bad = chk[(chk.alloc - chk.amt).abs() > 0.001]",
+      "shape_problems": [],
+      "id": "a8",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The rounding adjustment in cell 32 ensures that any minor discrepancy between `amt_rc` sum and receipt `amt` is applied to the final non-WO line.",
+      "kind": "fact",
+      "citations": [
+       "C32:L6-7"
+      ],
+      "evidence": "ln.loc[j, \"amt_rc\"] = round(ln.loc[j, \"amt_rc\"] + v, 2)",
+      "shape_problems": [],
+      "id": "a9",
+      "origin": "model",
+      "status": "partial",
+      "problems": [
+       "amt does not appear in the cited lines (they read: 'j = ln[(ln.rcpt_id == rid) & (ln.typ != \"WO\")].index[-1] | ln.loc[j, \"amt_rc\"] = round(ln.')"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Invoice balances stored in `bal` must never become negative.",
+      "kind": "fact",
+      "citations": [
+       "C26:L52-56"
+      ],
+      "evidence": "neg = [d for d, v in bal.items() if v < -0.005]",
+      "shape_problems": [],
+      "id": "a10",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Invoices flagged with `dispute == 1` are excluded from `EXACT` and `FIFO` allocations.",
+      "kind": "fact",
+      "citations": [
+       "C26:L20",
+       "C26:L34"
+      ],
+      "evidence": "meta[d][\"dispute\"] == 0",
+      "shape_problems": [],
+      "id": "a11",
+      "origin": "model",
+      "status": "partial",
+      "problems": [
+       "1 does not appear in the cited lines (they read: 'c = [d for d in pools[pool] if meta[d][\"dispute\"] == 0 and bal[d] > 0 and abs(bal[d] - rem'; 'ds = [d for d in pools[pool] if meta[d][\"dispute\"] == 0 and bal[d] > 0]')"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipt lines cannot allocate more than the remaining open balance of an invoice.",
+      "kind": "fact",
+      "citations": [
+       "C26:L11",
+       "C26:L25",
+       "C26:L39"
+      ],
+      "evidence": "a = min(rem, bal[d])",
+      "shape_problems": [],
+      "id": "a12",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipts with unresolved customer mappings are routed to `SUSP` rather than `UNAPP`.",
+      "kind": "fact",
+      "citations": [
+       "C30:L14-17"
+      ],
+      "evidence": "lines.append([rid, \"SUSP\", None, rem])",
+      "shape_problems": [],
+      "id": "a13",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Company-level receipt totals must reconcile with line totals across all companies.",
+      "kind": "fact",
+      "citations": [
+       "C41:L1-8"
+      ],
+      "evidence": "cr[\"diff\"] = (cr.bank - cr.lines).round(2)",
+      "shape_problems": [],
+      "id": "a14",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Risky areas",
+    "claims": [
+     {
+      "text": "`TOL` is initialized to 0.5 but then reassigned to 5.0 in cell 29.",
+      "kind": "fact",
+      "citations": [
+       "C4:L1",
+       "C29:L4"
+      ],
+      "evidence": "TOL = 5.0",
+      "shape_problems": [],
+      "id": "a15",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Changing `TOL` affects both the threshold to trigger `apply_fifo` and the write-off threshold in `do_wo`.",
+      "kind": "risk",
+      "citations": [
+       "C26:L48",
+       "C29:L4",
+       "C30:L10"
+      ],
+      "evidence": "if bal[d] > 0.005 and bal[d] <= TOL:",
+      "shape_problems": [],
+      "id": "a16",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Matching reference numbers by `first('cust_no')` arbitrarily chooses a customer if multiple open items share the doc number.",
+      "kind": "risk",
+      "citations": [
+       "C13:L1-3"
+      ],
+      "evidence": ".groupBy(\"rcpt_id\").agg(F.first(\"cust_no\").alias(\"c_ref\"))",
+      "shape_problems": [],
+      "id": "a17",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Deduplicating `x2` by `dropDuplicates(['rcpt_id'])` arbitrarily selects a customer when payer names match multiple aliases.",
+      "kind": "risk",
+      "citations": [
+       "C13:L5-6"
+      ],
+      "evidence": "x2 = x2.dropDuplicates([\"rcpt_id\"])",
+      "shape_problems": [],
+      "id": "a18",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "In `apply_fifo`, invoices are sorted by `-bal[d]`, which allocates largest balances first instead of true first-in-first-out by date.",
+      "kind": "risk",
+      "citations": [
+       "C26:L35"
+      ],
+      "evidence": "ds = sorted(ds, key=lambda d: -bal[d])",
+      "shape_problems": [],
+      "id": "a19",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Discrepancy check `bad` only prints warnings and does not interrupt execution or fail the job.",
+      "kind": "risk",
+      "citations": [
+       "C34:L4-7"
+      ],
+      "evidence": "print(\"recon mismatches:\", len(bad))",
+      "shape_problems": [],
+      "id": "a20",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Company reconciliation break check only prints a message without halting execution.",
+      "kind": "risk",
+      "citations": [
+       "C41:L7-8"
+      ],
+      "evidence": "print(\"CO RECON BREAK\")",
+      "shape_problems": [],
+      "id": "a21",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "The notebook exit status always reports `\"status\": \"ok\"` regardless of reconciliation breaks.",
+      "kind": "risk",
+      "citations": [
+       "C47:L1"
+      ],
+      "evidence": "dbutils.notebook.exit(json.dumps({\"status\": \"ok\",",
+      "shape_problems": [],
+      "id": "a22",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "`notify_ar` and `log_run` execute even when `dry == \"Y\"` and tables were not written.",
+      "kind": "risk",
+      "citations": [
+       "C37:L1-5",
+       "C43:L11",
+       "C44:L1"
+      ],
+      "evidence": "notify_ar(h)",
+      "shape_problems": [],
+      "id": "a23",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Do not change without approval",
+    "claims": [
+     {
+      "text": "The excluded customer list `EXCL` contains `\"C10077\"` and `\"C10412\"`.",
+      "kind": "fact",
+      "citations": [
+       "C4:L5",
+       "C8:L6"
+      ],
+      "evidence": "EXCL = [\"C10077\", \"C10412\"]",
+      "shape_problems": [],
+      "id": "a24",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The bank account to company code mapping `bk` maps four specific bank accounts.",
+      "kind": "fact",
+      "citations": [
+       "C4:L4"
+      ],
+      "evidence": "bk = {\"DB-4471\": \"DK01\", \"HDFC-0932\": \"IN02\", \"DBS-1180\": \"SG01\", \"JPM-2290\": \"US01\"}",
+      "shape_problems": [],
+      "id": "a25",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Exact match tolerance `EX_TOL` is set to 0.01.",
+      "kind": "fact",
+      "citations": [
+       "C4:L3",
+       "C26:L20"
+      ],
+      "evidence": "EX_TOL = 0.01",
+      "shape_problems": [],
+      "id": "a26",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Table `fin_cash.alloc_lines` is overwritten using `mode(\"overwrite\")` and `overwriteSchema` enabled.",
+      "kind": "fact",
+      "citations": [
+       "C4:L6",
+       "C37:L1-2"
+      ],
+      "evidence": "out.write.format(\"delta\").mode(\"overwrite\").option(\"overwriteSchema\", \"true\").saveAsTable(tgt)",
+      "shape_problems": [],
+      "id": "a27",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Table `fin_cash.open_items_after` is overwritten using `mode(\"overwrite\")`.",
+      "kind": "fact",
+      "citations": [
+       "C38:L8-9"
+      ],
+      "evidence": "oa.write.format(\"delta\").mode(\"overwrite\").saveAsTable(\"fin_cash.open_items_after\")",
+      "shape_problems": [],
+      "id": "a28",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Table `fin_cash.ar_aging_snap` is appended to using `mode(\"append\")`.",
+      "kind": "fact",
+      "citations": [
+       "C39:L8-9"
+      ],
+      "evidence": "spark.createDataFrame(snap).write.format(\"delta\").mode(\"append\").saveAsTable(\"fin_cash.ar_aging_snap\")",
+      "shape_problems": [],
+      "id": "a29",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Customer identification precedence order is strictly AR overrides (`c_ov`), reference match (`c_ref`), then payer name match (`c_nm`).",
+      "kind": "fact",
+      "citations": [
+       "C14:L2-6"
+      ],
+      "evidence": "rr = rr.withColumn(\"cust\", F.coalesce(\"c_ov\", \"c_ref\", \"c_nm\"))",
+      "shape_problems": [],
+      "id": "a30",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "How to verify a change is safe",
+    "claims": [
+     {
+      "text": "Run the notebook with widget `dry` set to `\"Y\"` to prevent writing to any Delta tables.",
+      "kind": "fact",
+      "citations": [
+       "C3:L4",
+       "C37:L1-5",
+       "C38:L8-9",
+       "C39:L8-9"
+      ],
+      "evidence": "if dry == \"N\":",
+      "shape_problems": [],
+      "id": "a31",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Verify that `check_bal()` returns 0 negative balances during execution.",
+      "kind": "fact",
+      "citations": [
+       "C26:L52-56",
+       "C30:L18"
+      ],
+      "evidence": "print(len(lines), check_bal())",
+      "shape_problems": [],
+      "id": "a32",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Verify that `recon mismatches:` prints 0 rows in cell 34.",
+      "kind": "fact",
+      "citations": [
+       "C34:L4-5"
+      ],
+      "evidence": "print(\"recon mismatches:\", len(bad))",
+      "shape_problems": [],
+      "id": "a33",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Check that cell 41 does not print `CO RECON BREAK`.",
+      "kind": "fact",
+      "citations": [
+       "C41:L7-8"
+      ],
+      "evidence": "if (cr[\"diff\"].abs() > 0.01).any():",
+      "shape_problems": [],
+      "id": "a34",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Confirm that the final exit payload reports `bad` equal to 0.",
+      "kind": "fact",
+      "citations": [
+       "C47:L1"
+      ],
+      "evidence": "\"bad\": len(bad)",
+      "shape_problems": [],
+      "id": "a35",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Compare allocation type totals and counts generated in cell 34 before and after modifying matching logic.",
+      "kind": "fact",
+      "citations": [
+       "C34:L8-9"
+      ],
+      "evidence": "smry = ln.groupby(\"typ\").agg(n=(\"rcpt_id\", \"count\"), usd=(\"amt_usd\", \"sum\")).round(2)",
+      "shape_problems": [],
+      "id": "a36",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Also detected by static analysis",
+    "claims": [
+     {
+      "text": "`MAX_WO` is set to `250.0` at C4:L2 but is never read anywhere in the notebook, so whatever rule it describes is not applied.",
+      "kind": "risk",
+      "citations": [
+       "C4:L2"
+      ],
+      "evidence": "MAX_WO = 250.0",
+      "origin": "static",
+      "flag": "unused-constant:MAX_WO",
+      "id": "a37",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The check `dq[\"rcpt_dup\"] > 0` at C19:L9-10 only prints a message; it does not stop the run.",
+      "kind": "risk",
+      "citations": [
+       "C19:L9-10"
+      ],
+      "evidence": "if dq[\"rcpt_dup\"] > 0:",
+      "origin": "static",
+      "flag": "print-check:C19:L9-10",
+      "id": "a38",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   }
+  ],
+  "audience": "agent",
+  "repair_rounds": 0,
+  "coverage": {
+   "flags_total": 16,
+   "flags_cited": 16,
+   "missing": []
+  },
+  "stats": {
+   "claims": 38,
+   "verified": 32,
+   "partial": 2,
+   "unchecked": 4,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 0,
+   "static_added": 2,
+   "citations": 60
+  }
+ },
+ "manager": {
+  "title": "Cash Application Engine Review",
+  "sections": [
+   {
+    "heading": "What this notebook does",
+    "claims": [
+     {
+      "text": "The process ingests bank receipts, customer accounts, and open invoices from CSV storage paths.",
+      "kind": "fact",
+      "citations": [
+       "C6:L1",
+       "C8:L1",
+       "C9:L1"
+      ],
+      "evidence": "spark.read.option(\"header\", True).csv(src + \"bank_receipts.csv\")",
+      "shape_problems": [],
+      "id": "m1",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipts are matched against invoices using remittance reference numbers, exact amount matches, or oldest unpaid items first.",
+      "kind": "fact",
+      "citations": [
+       "C30:L7",
+       "C30:L9",
+       "C30:L11"
+      ],
+      "evidence": "rem = apply_ref(rid, rem, x.refs, lines)",
+      "shape_problems": [],
+      "id": "m2",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "When not running in dry-run mode, the engine overwrites the table specified by `tgt` (`fin_cash.alloc_lines`).",
+      "kind": "fact",
+      "citations": [
+       "C4:L6",
+       "C37:L1-2"
+      ],
+      "evidence": "tgt = \"fin_cash.alloc_lines\"",
+      "shape_problems": [],
+      "id": "m3",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true,
+      "repair_rounds": 1,
+      "repaired": true
+     },
+     {
+      "text": "An aging snapshot table is updated with current invoice balances using append mode.",
+      "kind": "fact",
+      "citations": [
+       "C39:L8-9"
+      ],
+      "evidence": "mode(\"append\").saveAsTable(\"fin_cash.ar_aging_snap\")",
+      "shape_problems": [],
+      "id": "m4",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "The business rules",
+    "claims": [
+     {
+      "text": "Invoices belonging to customer identifiers `C10077` and `C10412` are excluded from matching.",
+      "kind": "fact",
+      "citations": [
+       "C4:L5",
+       "C8:L6"
+      ],
+      "evidence": "~F.col(\"cust_no\").isin(EXCL)",
+      "shape_problems": [],
+      "id": "m5",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipts and open items are converted to US Dollars using exchange rates before matching balances.",
+      "kind": "fact",
+      "citations": [
+       "C18:L3",
+       "C18:L7"
+      ],
+      "evidence": "rr = rr.withColumn(\"amt_usd\", F.col(\"amt\") * F.col(\"r_rate\"))",
+      "shape_problems": [],
+      "id": "m6",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Exact matching applies when the difference between the receipt remainder and the open invoice amount is within 0.01.",
+      "kind": "fact",
+      "citations": [
+       "C4:L3",
+       "C26:L20"
+      ],
+      "evidence": "abs(bal[d] - rem) <= EX_TOL",
+      "shape_problems": [],
+      "id": "m7",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Remaining invoice balances of 5.0 or less are automatically written off.",
+      "kind": "fact",
+      "citations": [
+       "C26:L48-50",
+       "C29:L4"
+      ],
+      "evidence": "if bal[d] > 0.005 and bal[d] <= TOL:",
+      "shape_problems": [],
+      "id": "m8",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipt funds that cannot be tied to an identified customer account are allocated to suspense.",
+      "kind": "fact",
+      "citations": [
+       "C30:L16-17"
+      ],
+      "evidence": "lines.append([rid, \"SUSP\", None, rem])",
+      "shape_problems": [],
+      "id": "m9",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Receipt allocations determine General Ledger accounts via the external utility function `get_gl_map`.",
+      "kind": "external",
+      "citations": [
+       "C5:L1",
+       "C33:L3"
+      ],
+      "evidence": "gm[c] = get_gl_map(c)",
+      "shape_problems": [],
+      "id": "m10",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "What could go wrong",
+    "claims": [
+     {
+      "text": "The write-off threshold is redefined from 0.5 to 5.0 later in the notebook, which increases automatic write-off exposure tenfold without warning.",
+      "kind": "risk",
+      "citations": [
+       "C4:L1",
+       "C29:L4"
+      ],
+      "evidence": "TOL = 5.0",
+      "shape_problems": [],
+      "id": "m11",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Company reconciliation breaks are detected and printed after data has already been permanently overwritten to disk.",
+      "kind": "risk",
+      "citations": [
+       "C37:L1-2",
+       "C41:L7-8"
+      ],
+      "evidence": "print(\"CO RECON BREAK\")",
+      "shape_problems": [],
+      "id": "m12",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Email or message alerts trigger via `notify_ar` even during dry-run runs when nothing is written to ledger tables.",
+      "kind": "risk",
+      "citations": [
+       "C37:L1",
+       "C43:L11"
+      ],
+      "evidence": "notify_ar(h)",
+      "shape_problems": [],
+      "id": "m13",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "The pipeline notebook always reports success upon exiting even if reconciliation discrepancies or unmatched receipts occurred.",
+      "kind": "risk",
+      "citations": [
+       "C47:L1"
+      ],
+      "evidence": "dbutils.notebook.exit(json.dumps({\"status\": \"ok\", \"rcpt\": len(rp), \"lines\": len(ln), \"bad\": len(bad)}))",
+      "shape_problems": [],
+      "id": "m14",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Duplicate bank receipt identifiers are detected only with a console printout, allowing duplicated transactions to proceed into allocation.",
+      "kind": "risk",
+      "citations": [
+       "C19:L9-10"
+      ],
+      "evidence": "print(\"WARNING dup receipts!!\")",
+      "shape_problems": [],
+      "id": "m15",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     }
+    ]
+   },
+   {
+    "heading": "Questions for the owner",
+    "claims": [
+     {
+      "text": "Was the write-off threshold intended to be 0.50 USD as initialized, or 5.00 USD as reassigned later?",
+      "kind": "question",
+      "citations": [
+       "C4:L1",
+       "C29:L4"
+      ],
+      "evidence": "TOL = 5.0",
+      "shape_problems": [],
+      "id": "m16",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     },
+     {
+      "text": "Should the pipeline abort rather than overwrite production financial tables when company-level reconciliation breaks occur?",
+      "kind": "question",
+      "citations": [
+       "C37:L2",
+       "C41:L7-8"
+      ],
+      "evidence": "if (cr[\"diff\"].abs() > 0.01).any():",
+      "shape_problems": [],
+      "id": "m17",
+      "origin": "model",
+      "status": "unchecked",
+      "problems": [
+       "only the quote was checked: the claim names nothing in the code"
+      ],
+      "evidence_found": true
+     },
+     {
+      "text": "Why is the maximum write-off parameter `MAX_WO` defined as 250.0 but never enforced anywhere in allocation logic?",
+      "kind": "question",
+      "citations": [
+       "C4:L2"
+      ],
+      "evidence": "MAX_WO = 250.0",
+      "shape_problems": [],
+      "id": "m18",
+      "origin": "model",
+      "status": "verified",
+      "problems": [],
+      "evidence_found": true
+     }
+    ]
+   }
+  ],
+  "audience": "manager",
+  "repair_rounds": 1,
+  "coverage": {
+   "flags_total": 16,
+   "flags_cited": 11,
+   "missing": [
+    "overwrite:C38:L9",
+    "nondeterministic:C13:L3",
+    "nondeterministic:C13:L6",
+    "driver-side",
+    "print-check:C34:L6-7"
+   ]
+  },
+  "stats": {
+   "claims": 18,
+   "verified": 9,
+   "partial": 0,
+   "unchecked": 9,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 1,
+   "static_added": 0,
+   "citations": 33
+  }
+ }
+}

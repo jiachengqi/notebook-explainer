@@ -1,0 +1,358 @@
+{
+ "generated_at": "2026-11-22T00:35:49+00:00",
+ "seconds": 296.8,
+ "notebook": {
+  "name": "cash_application_engine.py",
+  "format": "databricks-python",
+  "sha256": "997b9d0c2ab16af3df31bfafbcc471a8af1a18a96dc9fd9796bea425da11f5bf",
+  "cells": 47,
+  "cell_lines": 412,
+  "file_lines": 551,
+  "languages": {
+   "md": 1,
+   "python": 43,
+   "run": 1,
+   "sql": 2
+  }
+ },
+ "provider": {
+  "name": "gemini",
+  "kind": "openai_compat",
+  "model": "gemini-3.8-flash",
+  "base_url": "https://generativelanguage.googleapis.com/v1beta/openai",
+  "key_env": "GEMINI_API_KEY",
+  "key_present": true
+ },
+ "usage": {
+  "input_tokens": 54028,
+  "output_tokens": 8558,
+  "calls": 4,
+  "cache_hits": 0
+ },
+ "settings": {
+  "max_repair_rounds": 2,
+  "on_unverified": "flag",
+  "cache": true,
+  "parallel": true
+ },
+ "documents": {
+  "developer": {
+   "claims": 43,
+   "verified": 35,
+   "partial": 1,
+   "unchecked": 7,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 0,
+   "static_added": 0,
+   "citations": 88,
+   "repair_rounds": 0,
+   "coverage": {
+    "flags_total": 16,
+    "flags_cited": 15,
+    "missing": [
+     "print-check:C19:L9-10"
+    ]
+   }
+  },
+  "agent": {
+   "claims": 38,
+   "verified": 32,
+   "partial": 2,
+   "unchecked": 4,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 0,
+   "static_added": 2,
+   "citations": 60,
+   "repair_rounds": 0,
+   "coverage": {
+    "flags_total": 16,
+    "flags_cited": 16,
+    "missing": []
+   }
+  },
+  "manager": {
+   "claims": 18,
+   "verified": 9,
+   "partial": 0,
+   "unchecked": 9,
+   "unverified": 0,
+   "invalid": 0,
+   "dropped": 0,
+   "repaired": 1,
+   "static_added": 0,
+   "citations": 33,
+   "repair_rounds": 1,
+   "coverage": {
+    "flags_total": 16,
+    "flags_cited": 11,
+    "missing": [
+     "overwrite:C38:L9",
+     "nondeterministic:C13:L3",
+     "nondeterministic:C13:L6",
+     "driver-side",
+     "print-check:C34:L6-7"
+    ]
+   }
+  }
+ },
+ "static_flags": [
+  {
+   "id": "reassigned-constant:TOL",
+   "severity": "high",
+   "title": "`TOL` is set to 0.5 at C4:L1 and reassigned to 5.0 at C29:L4",
+   "citations": [
+    "C4:L1",
+    "C29:L4"
+   ]
+  },
+  {
+   "id": "overwrite:C37:L2",
+   "severity": "high",
+   "title": "Overwrites table fin_cash.alloc_lines with `overwriteSchema=true` at C37:L2",
+   "citations": [
+    "C37:L2",
+    "C4:L6"
+   ]
+  },
+  {
+   "id": "overwrite:C38:L9",
+   "severity": "high",
+   "title": "Overwrites table fin_cash.open_items_after at C38:L9",
+   "citations": [
+    "C38:L9"
+   ]
+  },
+  {
+   "id": "print-check:C41:L7-8",
+   "severity": "high",
+   "title": "Check `(cr[\"diff\"].abs() > 0.01).any()` at C41:L7-8 only prints and runs after data is written",
+   "citations": [
+    "C41:L7-8",
+    "C37:L2"
+   ]
+  },
+  {
+   "id": "ungated-call:notify_ar:C43:L11",
+   "severity": "high",
+   "title": "`notify_ar` at C43:L11 runs even when the writes are skipped",
+   "citations": [
+    "C43:L11",
+    "C37:L2"
+   ]
+  },
+  {
+   "id": "constant-exit:C47:L1",
+   "severity": "high",
+   "title": "Always exits with status ok at C47:L1",
+   "citations": [
+    "C47:L1"
+   ]
+  },
+  {
+   "id": "unused-constant:MAX_WO",
+   "severity": "medium",
+   "title": "`MAX_WO` = 250.0 is set at C4:L2 but never used",
+   "citations": [
+    "C4:L2"
+   ]
+  },
+  {
+   "id": "external-names",
+   "severity": "medium",
+   "title": "Uses `get_gl_map`, `log_run`, `notify_ar` without defining them",
+   "citations": [
+    "C5:L1",
+    "C33:L3",
+    "C44:L1",
+    "C43:L11"
+   ]
+  },
+  {
+   "id": "nondeterministic:C13:L3",
+   "severity": "medium",
+   "title": "`first` at C13:L3 picks an arbitrary value",
+   "citations": [
+    "C13:L3"
+   ]
+  },
+  {
+   "id": "nondeterministic:C13:L6",
+   "severity": "medium",
+   "title": "`dropDuplicates` at C13:L6 keeps an arbitrary row per key",
+   "citations": [
+    "C13:L6"
+   ]
+  },
+  {
+   "id": "print-check:C19:L9-10",
+   "severity": "medium",
+   "title": "Check `dq[\"rcpt_dup\"] > 0` at C19:L9-10 only prints",
+   "citations": [
+    "C19:L9-10"
+   ]
+  },
+  {
+   "id": "driver-side",
+   "severity": "medium",
+   "title": "Data is pulled to the driver (iterrows, toPandas)",
+   "citations": [
+    "C24:L1",
+    "C24:L2",
+    "C40:L1",
+    "C23:L10",
+    "C30:L3"
+   ]
+  },
+  {
+   "id": "global-state:bal",
+   "severity": "medium",
+   "title": "Global `bal` is modified inside `apply_ref`, `apply_exact`, `apply_fifo`, `do_wo`",
+   "citations": [
+    "C26:L1",
+    "C26:L12",
+    "C26:L17",
+    "C26:L26",
+    "C26:L31",
+    "C26:L40",
+    "C26:L45",
+    "C26:L50"
+   ]
+  },
+  {
+   "id": "print-check:C34:L6-7",
+   "severity": "medium",
+   "title": "Check `len(bad) > 0` at C34:L6-7 only prints",
+   "citations": [
+    "C34:L6-7"
+   ]
+  },
+  {
+   "id": "append:C39:L9",
+   "severity": "medium",
+   "title": "Appends to table fin_cash.ar_aging_snap at C39:L9",
+   "citations": [
+    "C39:L9"
+   ]
+  },
+  {
+   "id": "ungated-call:log_run:C44:L1",
+   "severity": "medium",
+   "title": "`log_run` at C44:L1 runs even when the writes are skipped",
+   "citations": [
+    "C44:L1",
+    "C37:L2"
+   ]
+  },
+  {
+   "id": "unused-import:math",
+   "severity": "low",
+   "title": "Import `math` at C2:L6 is never used",
+   "citations": [
+    "C2:L6"
+   ]
+  },
+  {
+   "id": "unused-import:reduce",
+   "severity": "low",
+   "title": "Import `reduce` at C2:L7 is never used",
+   "citations": [
+    "C2:L7"
+   ]
+  },
+  {
+   "id": "mount-path:C3:L1",
+   "severity": "low",
+   "title": "Default path '/mnt/fin-raw/cashapp/' at C3:L1 is a DBFS mount",
+   "citations": [
+    "C3:L1"
+   ]
+  },
+  {
+   "id": "spark-conf:C4:L8",
+   "severity": "low",
+   "title": "Spark configuration is set in code at C4:L8",
+   "citations": [
+    "C4:L8"
+   ]
+  },
+  {
+   "id": "python-udf",
+   "severity": "low",
+   "title": "Python UDFs are used",
+   "citations": [
+    "C10:L11",
+    "C10:L18"
+   ]
+  },
+  {
+   "id": "nondeterministic:C11:L2",
+   "severity": "low",
+   "title": "`dropDuplicates` at C11:L2 keeps an arbitrary row per key",
+   "citations": [
+    "C11:L2"
+   ]
+  },
+  {
+   "id": "nondeterministic:C11:L4",
+   "severity": "low",
+   "title": "`dropDuplicates` at C11:L4 keeps an arbitrary row per key",
+   "citations": [
+    "C11:L4"
+   ]
+  },
+  {
+   "id": "commented-code:C15:L2-18",
+   "severity": "low",
+   "title": "Commented-out code at C15:L2-18 (15 lines)",
+   "citations": [
+    "C15:L2-18"
+   ]
+  },
+  {
+   "id": "commented-code:C18:L2",
+   "severity": "low",
+   "title": "Commented-out code at C18:L2 (1 line)",
+   "citations": [
+    "C18:L2"
+   ]
+  },
+  {
+   "id": "commented-code:C20:L1-21",
+   "severity": "low",
+   "title": "Commented-out code at C20:L1-21 (21 lines)",
+   "citations": [
+    "C20:L1-21"
+   ]
+  },
+  {
+   "id": "unused-function:alloc_by_aging",
+   "severity": "low",
+   "title": "Function `alloc_by_aging` (C23:L1-20) is never called",
+   "citations": [
+    "C23:L1-20"
+   ]
+  },
+  {
+   "id": "mutable-default:alloc_by_aging",
+   "severity": "low",
+   "title": "`alloc_by_aging` has a mutable default argument [30, 60, 90]",
+   "citations": [
+    "C23:L1"
+   ]
+  }
+ ],
+ "redacted_lines": [],
+ "prompt_hashes": {
+  "agent:generate": "553abb3bd52d3885",
+  "manager:generate": "a20c16d6273d171b",
+  "developer:generate": "76652dc54c8b5fdd",
+  "manager:repair 1": "123021f69f509cad"
+ },
+ "notes": [],
+ "errors": [],
+ "rechecked_at": "2026-11-24T23:42:18+00:00"
+}

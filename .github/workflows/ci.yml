@@ -1,0 +1,33 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Pinned to a commit, not a tag, so a moved tag cannot change what runs here.
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3  # v6.0.0
+        with:
+          persist-credentials: false
+
+      - name: Unit tests (no network, no keys)
+        run: python3 -m unittest -v
+
+      - name: Red-team suite
+        run: python3 -m harness redteam
+
+      - name: Offline run on every sample
+        run: |
+          for f in samples/*; do
+            python3 -m harness generate "$f" --provider offline
+          done
+
+      - name: Submitted documents still match the notebook
+        run: python3 -m harness verify docs/generated --notebook samples/cash_application_engine.py

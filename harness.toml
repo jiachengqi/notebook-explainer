@@ -1,0 +1,67 @@
+# Notebook Explainer configuration.
+# Switch provider here, with HARNESS_PROVIDER=<name>, with --provider, or in the UI dropdown.
+# API keys never go in this file: put them in .env (see .env.example) or the environment.
+
+provider = "gemini"
+
+[server]
+host = "127.0.0.1"      # local only; the server refuses other hosts
+port = 8765
+open_browser = true
+
+[generation]
+temperature = 0.0
+timeout_seconds = 180
+max_repair_rounds = 2          # how many times failing claims go back to the model
+on_unverified = "flag"         # "flag" keeps the claim with a warning; "drop" removes it
+parallel = true                # the three documents are generated at the same time
+cache = true                   # same provider, model, settings and prompt => reuse the stored answer
+coverage_audiences = ["agent"] # documents that must cite every high/medium static red flag
+max_prompt_tokens = 120000     # refuse bigger prompts (the sample notebook is about 14k)
+
+[paths]
+runs_dir = "runs"
+cache_dir = ".cache/llm"
+
+[policy]
+local_only = false             # true: refuse any provider that sends code off this machine (or HARNESS_LOCAL_ONLY=1)
+
+# kind = "openai_compat" works with any OpenAI-compatible chat-completions endpoint.
+
+[providers.gemini]                    # Google AI Studio key: https://aistudio.google.com
+kind = "openai_compat"
+base_url = "https://generativelanguage.googleapis.com/v1beta/openai"
+model = "gemini-3.8-flash"
+api_key_env = "GEMINI_API_KEY"
+response_format = "json_schema"       # json_schema | json_object | none
+temperature = 1.0                     # Google recommends 1.0 for Gemini 3 models; lower can loop or degrade
+reasoning_effort = "low"              # low = faster; high = more thinking, slower. Delete the line for the model's default
+timeout_seconds = 600                 # a full document can take minutes to come back
+
+# Local model, nothing leaves the machine. `ollama pull <model>`, then start the server with a context
+# window big enough for a ~10k-token prompt: OLLAMA_CONTEXT_LENGTH=32768 ollama serve
+[providers.ollama]
+kind = "openai_compat"
+base_url = "http://localhost:11434/v1"
+model = "qwen2.5-coder:7b"
+api_key_env = ""
+response_format = "json_schema"
+timeout_seconds = 600
+
+[providers.anthropic]
+kind = "anthropic"
+base_url = "https://api.anthropic.com/v1"
+model = "claude-sonnet-5-5"
+api_key_env = "ANTHROPIC_API_KEY"
+max_tokens = 16000
+
+[providers.openai]
+kind = "openai_compat"
+base_url = "https://api.openai.com/v1"
+model = "gpt-5-mini"
+api_key_env = "OPENAI_API_KEY"
+response_format = "json_schema"
+
+[providers.offline]                   # no model: documents from static analysis only (tests, demo fallback)
+kind = "offline"
+model = "static-analysis"

@@ -1,0 +1,10 @@
+[project]
+name = "notebook-explainer"
+version = "1.0.0"
+description = "Local web app that writes cited documentation for Databricks notebooks for three audiences."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []   # standard library only
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

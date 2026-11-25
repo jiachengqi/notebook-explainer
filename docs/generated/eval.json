@@ -1,0 +1,219 @@
+{
+ "items": [
+  {
+   "id": "G01-ref-any-customer",
+   "what": "REF pays referenced invoices with no customer, entity or dispute check",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G02-override-ignored",
+   "what": "Manual override only sets the customer; REF still pays the referenced invoice",
+   "developer": "d7",
+   "agent": "a30",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G03-ambiguous-name",
+   "what": "Ambiguous payer names resolve to an arbitrary customer (dropDuplicates)",
+   "developer": null,
+   "agent": "a18",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G04-fifo-largest-first",
+   "what": "The 'FIFO' step pays the largest open balances first, not the oldest",
+   "developer": "d23",
+   "agent": "a11",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G05-order-dependency",
+   "what": "Receipts are processed in value-date order against shared balances; earlier receipts can consume referenced invoices",
+   "developer": null,
+   "agent": null,
+   "manager": "m2",
+   "any": true
+  },
+  {
+   "id": "G06-cross-entity",
+   "what": "EXACT/FIFO search the customer pool across legal entities",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G07-tol-reassigned",
+   "what": "TOL is reassigned from 0.5 to 5.0 in C29",
+   "developer": "d37",
+   "agent": "a15",
+   "manager": "m8",
+   "any": true
+  },
+  {
+   "id": "G08-max-wo-unused",
+   "what": "MAX_WO is declared but never enforced",
+   "developer": "d38",
+   "agent": "a37",
+   "manager": "m18",
+   "any": true
+  },
+  {
+   "id": "G09-silent-drops",
+   "what": "Negative receipts, unknown bank accounts and credit notes are dropped without a count",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G10-missing-fx",
+   "what": "A missing FX rate leaves the USD amount null and the receipt can vanish",
+   "developer": "d6",
+   "agent": null,
+   "manager": "m6",
+   "any": true
+  },
+  {
+   "id": "G11-checks-only-print",
+   "what": "Checks only print and do not stop the run; exit is always ok",
+   "developer": "d10",
+   "agent": "a20",
+   "manager": "m12",
+   "any": true
+  },
+  {
+   "id": "G12-recon-plug",
+   "what": "Rounding differences are plugged into the last line, so the recon passes by construction",
+   "developer": null,
+   "agent": "a9",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G13-dry-run-email",
+   "what": "notify_ar and log_run run even in dry runs",
+   "developer": "d35",
+   "agent": "a23",
+   "manager": "m13",
+   "any": true
+  },
+  {
+   "id": "G14-overwrite",
+   "what": "Tables are overwritten each run (history and other entities lost)",
+   "developer": "d32",
+   "agent": "a27",
+   "manager": "m3",
+   "any": true
+  },
+  {
+   "id": "G15-run-dependency",
+   "what": "get_gl_map, notify_ar, log_run come from %run ../shared/fin_utils",
+   "developer": "d5",
+   "agent": "a3",
+   "manager": "m10",
+   "any": true
+  },
+  {
+   "id": "G16-global-state",
+   "what": "Global mutable bal makes the notebook order-dependent and not re-runnable cell by cell",
+   "developer": "d43",
+   "agent": "a7",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G17-value-date-fx",
+   "what": "Value-date FX is computed but unused (commented out); latest rate is used",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G18-dead-code",
+   "what": "Dead code: v2 matching, fuzzy matching, alloc_by_aging",
+   "developer": "d40",
+   "agent": null,
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G19-name-normaliser",
+   "what": "Suffix stripping is substring-based and can corrupt names",
+   "developer": "d7",
+   "agent": null,
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G20-dispute-ref",
+   "what": "Disputed invoices are skipped by EXACT/FIFO but can still be paid by REF",
+   "developer": "d22",
+   "agent": "a11",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G21-driver-scale",
+   "what": "toPandas and row loops on the driver limit scale",
+   "developer": "d8",
+   "agent": "a5",
+   "manager": null,
+   "any": true
+  },
+  {
+   "id": "G22-dq-cannot-fire",
+   "what": "rcpt_no_dt counts null dates after they were already filtered out",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G23-excluded-customers",
+   "what": "Excluded customers are hard-coded without explanation",
+   "developer": "d19",
+   "agent": "a24",
+   "manager": "m5",
+   "any": true
+  },
+  {
+   "id": "G24-date-formats",
+   "what": "Value dates parse yyyy-MM-dd or dd/MM/yyyy only",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  },
+  {
+   "id": "G25-aging-append",
+   "what": "Aging snapshot is appended, so re-runs duplicate rows",
+   "developer": "d34",
+   "agent": "a29",
+   "manager": "m4",
+   "any": true
+  },
+  {
+   "id": "G26-sql-reads-table",
+   "what": "The SQL cells read the real table, so in a dry run they show the previous run",
+   "developer": null,
+   "agent": null,
+   "manager": null,
+   "any": false
+  }
+ ],
+ "totals": {
+  "developer": 16,
+  "agent": 15,
+  "manager": 10,
+  "any": 19
+ },
+ "n": 26
+}
